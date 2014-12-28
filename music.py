@@ -1,6 +1,7 @@
 import os
+import json
 from flask import Flask, request, session, g, \
-    render_template, flash
+    render_template, flash, Response
 from werkzeug import secure_filename
 
 UPLOAD_FOLDER = 'static/music/'
@@ -15,6 +16,10 @@ def allowed_file(filename):
   return '.' in filename and \
       filename.rsplit('.',1)[1] in ALLOWED_EXTENSIONS
 
+def get_music():
+  files = os.listdir('static/music')
+  return files
+
 @app.route('/', methods=['GET','POST'])
 def upload_file():
   if request.method == 'POST':
@@ -27,11 +32,21 @@ def upload_file():
 
 @app.route('/music')
 def display_music():
-  files = os.listdir('static/music')
+  files = get_music()
   return render_template('music.html', files=files)
 
 @app.route('/music/<filename>')
 def play_song(filename):
   return render_template('playsong.html', song=filename)
+
+@app.route('/playall')
+def play_all():
+  files = getmusic()
+  return render_template('playall.html', files=files)
+
+@app.route('/api/getsongs')
+def getsongs():
+  files = get_music()
+  return Response(json.dumps(files), mimetype="application/json")
 
 app.run(host='0.0.0.0', port=8000)
